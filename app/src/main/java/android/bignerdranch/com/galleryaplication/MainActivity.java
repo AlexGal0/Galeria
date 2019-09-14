@@ -113,14 +113,23 @@ public class MainActivity extends Activity {
         VideoView video = new VideoView(this);
 
         video.setVideoURI(videoUri);
-        video.pause();
         LinearLayout.LayoutParams options = new LinearLayout.LayoutParams(width/3, width/3);
         options.width = LinearLayout.LayoutParams.MATCH_PARENT;
         options.height = LinearLayout.LayoutParams.MATCH_PARENT;
         video.setLayoutParams(new LinearLayout.LayoutParams(width/3, width/3));
 
+        video.setOnClickListener(v ->{
+            Intent intent = new Intent(this, FullImage.class);
+            int i = grid.indexOfChild(v);
+            intent.putExtra(FullImage.URI, videoUri.toString());
+            intent.putExtra("class", 1);
+            intent.putExtra("index", index);
+            startActivityForResult(intent, REQUEST_FULL_IMAGE);
+        });
         grid.addView(video);
         grid.setColumnCount(3);
+        video.start();
+        video.pause();
     }
     private void addImage(int index) {
         ImageView image = new ImageView(this);
@@ -131,6 +140,7 @@ public class MainActivity extends Activity {
             int i = grid.indexOfChild(v);
             intent.putExtra(FullImage.URI, dir.get(i).toString());
             intent.putExtra("index", index);
+            intent.putExtra("class", 0);
             startActivityForResult(intent, REQUEST_FULL_IMAGE);
         });
         grid.setColumnCount(3);

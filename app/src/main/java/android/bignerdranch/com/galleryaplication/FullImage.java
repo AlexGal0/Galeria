@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import java.io.File;
 import java.time.Duration;
@@ -36,6 +37,7 @@ public class FullImage extends Activity{
     private int index;
     private Toolbar toolbar;
     private String filepath;
+    private int type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +45,26 @@ public class FullImage extends Activity{
         setContentView(R.layout.activity_full_image);
 
         toolbar = findViewById(R.id.my_toolbar);
-        toolbar.inflateMenu(R.menu.menu);
         index = getIntent().getIntExtra("index", -1);
+        type = getIntent().getIntExtra("class", -1);
         uri = Uri.parse(getIntent().getStringExtra(URI));
+        toolbar.inflateMenu(R.menu.menu);
         filepath = getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString() + uri.getPath().substring(10);
         ImageView imageView = findViewById(R.id.full_image_view);
-        grabImage(imageView);
+        VideoView videoView = findViewById(R.id.full_video_view);
+        if(type == 0){
+            grabImage(imageView);
+            videoView.setVisibility(View.GONE);
+        }
+        else{
+            setVideo(videoView);
+            imageView.setVisibility(View.GONE);
+        }
         Log.i("MARLON", index + "");
 
 
         toolbar.setOnMenuItemClickListener(menuItem -> {
+            if(type == 1 ) return true;
             switch (menuItem.getItemId()){
                 case R.id.delete_image:
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -73,6 +85,7 @@ public class FullImage extends Activity{
                     dialog.show();
                     return true;
                 case R.id.save_image:
+                    if(type == 1) return true;
                     if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             != PackageManager.PERMISSION_GRANTED){
                         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_WRITE);
@@ -122,6 +135,11 @@ public class FullImage extends Activity{
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(requestCode == PERMISSION_WRITE && grantResults[0] == PackageManager.PERMISSION_GRANTED)
             addImageToGallery(filepath, this);
+    }
+
+    public void setVideo(VideoView video) {
+        video.setVideoURI(uri);
+        video.start();
     }
 }
 
